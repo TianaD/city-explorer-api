@@ -13,7 +13,7 @@ app.use(cors()); //defines route that responds with json object when GET request
 //creating api endpoint of weather that processes GET request
 app.get('/weather', (request, response) => {
     // setting query parameter 
-    let {lat, lon, searchQuery} = request.query;
+    let { lat, lon, searchQuery } = request.query;
     // find method searches json file 
     // location = elements within the array (objects) in the weather.json file
     let weatherData = data.find(location => {
@@ -23,9 +23,15 @@ app.get('/weather', (request, response) => {
             return false;
         }
     });
-    if (weatherData == undefined) {
-        return response.status(400).send('Error : data does not exist!')
-    };
+    if (weatherData === undefined) {
+        return response.status(500).send('Error : data does not exist!')
+    }
+    let forecastData = weatherData.data.map(dailyForecast => {
+        return new Forecast(dailyForecast.valid_date, dailyForecast.weather.description, dailyForecast.high_temp, dailyForecast.low_temp)
+    })
+
+    response.send(forecastData)
+
 })
 
 
@@ -38,3 +44,6 @@ class Forecast {
         this.low_temp = low_temp;
     }
 }
+
+app.listen(3001)
+ console.log("By gum, you've got it!")
