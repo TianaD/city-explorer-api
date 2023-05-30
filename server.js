@@ -1,49 +1,43 @@
 'use strict' // for eliminating unnecessary javascript jargon
-
+const cityInput = require('./weather')
 // require library install
 require('dotenv').config(); // initializes our environment variables
 const express = require('express'); // create an object for the express library
 const cors = require('cors'); // create an object for the cors library
 // const {response} = require(express);
+const axios = require('axios');
 const data = require('./data/weather.json');
+const movieInput = require('./movie');
 const app = express(); //initialize express app
 app.use(cors()); //defines route that responds with json object when GET request is made to root path
 
 
-//creating api endpoint of weather that processes GET request
-app.get('/weather', (request, response) => {
-    // setting query parameter 
-    let { lat, lon, searchQuery } = request.query;
-    // find method searches json file 
-    // location = elements within the array (objects) in the weather.json file
-    let weatherData = data.find(location => {
-        if (lat === location.lat || lon === location.lon || searchQuery === location.city_name) {
-            return true;
-        } else {
-            return false;
-        }
-    });
-    if (weatherData === undefined) {
-        return response.status(500).send('Error : data does not exist!')
-    }
-    let forecastData = weatherData.data.map(dailyForecast => {
-        return new Forecast(dailyForecast.valid_date, dailyForecast.weather.description, dailyForecast.high_temp, dailyForecast.low_temp)
-    })
 
+
+// creating api endpoint of weather that processes GET request
+// get method returns a promise - a value that has not been determined yet; promise has three methods : then (accepts the function we want to run when we get the response back), catch(), finally()
+app.get('/weather', async (request, response) => {
+    // pass in url I want to send request to 
+    let { lat, lon } = request.query;
+    let forecastData = await cityInput(lat, lon)
+
+    // console.log(data)
     response.send(forecastData)
 
 })
 
 
-// create an class for Forecast 
-class Forecast {
-    constructor(date, description, high_temp, low_temp) {
-        this.date = date;
-        this.description = description;
-        this.high_temp = high_temp;
-        this.low_temp = low_temp;
-    }
-}
+app.get('/movies', async (request, response) => {
+    let {lat, lon} = request.query
+    let movieData = await movieInput(request.query.movie)
+    response.send(movieData)
+})
+
+
+
+
+
+
 
 app.listen(3001)
- console.log("By gum, you've got it!")
+console.log("By gum, you've got it!")
