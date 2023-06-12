@@ -1,13 +1,25 @@
 const axios = require('axios');
+const NodeCache = require('node-cache');
+const movieInput = require('./movie');
+const cache = new NodeCache();
+const cacheKey = `${movieInput}`;
+const cacheData = cache.get(cacheKey)
 
-async function cityInput(lat, lon) {
-    let response = await axios.get(`http://api.weatherbit.io/v2.0/forecast/daily?lat=${lat}&lon=${lon}&key=${process.env.WEATHER_API_KEY}`)
-    const forecastData = response.data.data.slice(0, 3).map(dailyForecastObject => {
-        return new Forecast(dailyForecastObject.valid_date, dailyForecastObject.weather.description, dailyForecastObject.high_temp, dailyForecastObject.low_temp)
-    })
-    return forecastData
+if (cacheData !== undefined) {
+    res.send(cacheData)
+} else {
+    async function cityInput(lat, lon) {
+        let response = await axios.get(`http://api.weatherbit.io/v2.0/forecast/daily?lat=${lat}&lon=${lon}&key=${process.env.WEATHER_API_KEY}`)
+        const forecastData = response.data.data.slice(0, 3).map(dailyForecastObject => {
+            return new Forecast(dailyForecastObject.valid_date, dailyForecastObject.weather.description, dailyForecastObject.high_temp, dailyForecastObject.low_temp)
+        })
+        cache.set(cacheKey, forecastData, 40000);
+        return forecastData
 
+    }
 }
+
+
 
 // create an class for Forecast 
 class Forecast {

@@ -9,8 +9,10 @@ const axios = require('axios');
 const data = require('./data/weather.json');
 const movieInput = require('./movie');
 const app = express(); //initialize express app
+const NodeCache = require('node-cache');
 app.use(cors()); //defines route that responds with json object when GET request is made to root path
-
+const weatherCache = new NodeCache();
+const movieCache = new NodeCache();
 
 
 
@@ -20,24 +22,17 @@ app.get('/weather', async (request, response) => {
     // pass in url I want to send request to 
     let { lat, lon } = request.query;
     let forecastData = await cityInput(lat, lon)
-
     // console.log(data)
     response.send(forecastData)
+    console.log(forecastData);
 
 })
-
 
 app.get('/movies', async (request, response) => {
     let {lat, lon} = request.query
     let movieData = await movieInput(request.query.movie)
     response.send(movieData)
 })
-
-
-
-
-
-
 
 app.listen(3001)
 console.log("By gum, you've got it!")
